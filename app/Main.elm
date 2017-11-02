@@ -19,9 +19,12 @@ import Html exposing (..)
 import Html as Html
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Http
 import String
 import Navigation
 import Date
+import Json.Decode as Decode
+import Json.Decode.Pipeline as DP
 
 main : Program ProgramOptions Model Msg
 main =
@@ -39,12 +42,18 @@ main =
 
 type alias ProgramOptions =
     { tokenResp : Maybe TokenResp
+    , config : Config
     }
 
 type alias Model =
-    { tokenResp : Maybe TokenResp
+    { config : Config
+    , tokenResp : Maybe TokenResp
+    , userInfo : Result String UserInfo
     }
 
+type alias Config =
+    { userInfoUrl : String
+    }
 
 type alias TokenResp =
     { idToken : String
@@ -52,18 +61,24 @@ type alias TokenResp =
     , scope : List String
     }
 
+type alias UserInfo =
+    { email : String
+    }
+
 type Msg
     = LoginRedirect
     | Logout
+    | UserInfoResp (Result Http.Error UserInfo)
 
 --------------------------------------------------
 -- INIT
 --------------------------------------------------
 
 init : ProgramOptions  -> (Model, Cmd Msg)
-init opt = ( Model opt.tokenResp
-           , Cmd.none
-           )
+init opt =
+  case opt.tokenResp of
+      Nothing -> ( Model opt.config Nothing (Err ""), Cmd.none )
+      Just tr -> ( Model opt.config (Just tr) (Err ""), fetchUserInfo opt.config tr )
 
 
 --------------------------------------------------
@@ -80,6 +95,31 @@ update msg model =
     -- otherwise double refresh (model change refresh plus after logout refresh)
     Logout -> ( model, logout () )
 
+    UserInfoResp (Ok user) -> ( { model | userInfo = Ok user }, Cmd.none )
+    UserInfoResp (Err e) -> ( { model | userInfo = Err (toString e) } , Cmd.none)
+
+-- Authorization: Bearer <access_token>
+
+fetchUserInfo : Config -> TokenResp -> Cmd Msg
+fetchUserInfo config tr =
+    let req = Http.request
+              { method = "GET"
+              , headers =
+                    [ Http.header "Authorization" ("Bearer " ++ tr.accessToken)
+                    ]
+              , url = config.userInfoUrl
+              , body = Http.emptyBody
+              , expect = Http.expectJson decodeUserInfo
+              , timeout = Nothing
+              , withCredentials = False
+              }
+    in
+        Http.send UserInfoResp req
+
+decodeUserInfo : Decode.Decoder UserInfo
+decodeUserInfo =
+    DP.decode UserInfo
+        |> DP.required "email" Decode.string
 
 
 --------------------------------------------------
@@ -124,13 +164,19 @@ loginRedirectHtml m =
                   ]
             ]
 
+        , displayUserInfo m
+
         , div []
             (case m.tokenResp of
                 Nothing -> []
                 Just t -> [ text t.accessToken ])
         ]
 
-
+displayUserInfo : Model -> Html Msg
+displayUserInfo m =
+    case m.userInfo of
+        Ok ui -> p [] [ text ui.email ]
+        Err e -> p [] [ text e ]
 
 fromInt : Int -> Date.Date
 fromInt = Date.fromTime << toFloat << (*) 1000

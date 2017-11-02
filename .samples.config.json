@@ -1,7 +1,7 @@
 {
     "oidc": {
         "oktaUrl": "http://rain.okta1.com:1802/",
-        "authzUrl": "/oauth2/aus65oktyNx0Md9qB0g4/v1/authorize",
+        "asId": "aus65oktyNx0Md9qB0g4",
         "clientId": "N5wJ9Xq3EFSnOQvE3E9S",
         "redirectUri": "http://localhost:54321/"
     },

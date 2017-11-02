@@ -19,32 +19,47 @@ const Elm = require('./Main.elm');
 
 export function bootstrap(config) {
 
+  const authzUrl = `${config.oktaUrl}oauth2/${config.asId}/v1/authorize`;
+  const userInfoUrl = `${config.oktaUrl}oauth2/${config.asId}/v1/userinfo`;
+  const issuer = `${config.oktaUrl}/oauth2/aus65oktyNx0Md9qB0g4`;
+
+
   const auth = new OktaAuth({
     url: config.oktaUrl,
-    issuer: config.oktaUrl, // <------- works! but sounds right?
+    issuer: issuer,
     clientId: config.clientId,
     redirectUri: config.redirectUri,
-    authorizeUrl: `${config.oktaUrl}${config.authzUrl}`,
+    authorizeUrl: authzUrl,
     scopes: ['openid', 'profile:read', 'usage:read'],
   });
 
-  const hashes = (window.location.hash.substr(1)).split('&') || [];
-  const hashObj = hashes.reduce((init, x) => {
-    const xs = x.split('=');
-    let key = xs[0];
-    const val = xs[1];
-    return Object.assign({}, init, {[key]: val});
-  }, {});
+
+  let hashObj = null;
+
+  if (window.location.hash) {
+    const hashes = window.location.hash.substr(1).split('&');
+    hashObj = hashes.reduce((init, x) => {
+      const xs = x.split('=');
+      let key = xs[0];
+      const val = xs[1];
+      return Object.assign({}, init, {[key]: val});
+    }, {});
+  }
+
+  const tokenResp = hashObj ? {
+    accessToken: hashObj['access_token'],
+    idToken: hashObj['id_token'],
+    scope: hashObj['scope'].split('+'),
+  } : null;
 
   console.log(hashObj);
 
   const containerEl = document.querySelector(config.container);
   const app = Elm.Main.embed(containerEl, {
-    tokenResp: {
-      accessToken: hashObj['access_token'],
-      idToken: hashObj['id_token'],
-      scope: hashObj['scope'].split('+'),
-    }
+    config: {
+      userInfoUrl
+    },
+    tokenResp: tokenResp,
   });
 
   app.ports.loginRedirect.subscribe(() => {
