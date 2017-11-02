@@ -3,13 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <title>App</title>
-    <link href="/assets/css/semantic-ui/semantic.min.css" type="text/css" rel="stylesheet"/>
-    <link href="/assets/css/samples.css" type="text/css" rel="stylesheet"/>
+    <link href="/assets/vendor/semantic.min.css" type="text/css" rel="stylesheet"/>
     <base href="/"/>
   </head>
 
-  <body id="samples">
+  <body>
 
+    <h1>Hello PG&amp;E</h1>
+    <div id="app-container">
+      </div>
 
     <script src="/assets/bundle.js"></script>
 
@@ -21,7 +23,7 @@
        redirectUri: '{{{config.oidc.redirectUri}}}'
      };
 
-     bundle.bootstrap(options);
+     //bundle.bootstrap(options);
     </script>
   </body>
 </html>
