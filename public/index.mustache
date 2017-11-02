@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>App</title>
+    <link href="/assets/css/semantic-ui/semantic.min.css" type="text/css" rel="stylesheet"/>
+    <link href="/assets/css/samples.css" type="text/css" rel="stylesheet"/>
+    <base href="/"/>
+  </head>
+
+  <body id="samples">
+
+
+    <script src="/assets/bundle.js"></script>
+
+    <script>
+     var options = {
+       container: '#app-container',
+       oktaUrl: '{{{config.oidc.oktaUrl}}}',
+       clientId: '{{config.oidc.clientId}}',
+       redirectUri: '{{{config.oidc.redirectUri}}}'
+     };
+
+     bundle.bootstrap(options);
+    </script>
+  </body>
+</html>

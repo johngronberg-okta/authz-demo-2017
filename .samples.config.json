@@ -1,0 +1,13 @@
+{
+    "oidc": {
+        "oktaUrl": "http://127.0.0.1:7777",
+        "clientId": "zYVNoNIeSwul32vpNiOz",
+        "clientSecret": "",
+        "redirectUri": "http://localhost:3000/authorization-code/callback"
+    },
+
+    "server": {
+        "port": 54321
+    }
+
+}
