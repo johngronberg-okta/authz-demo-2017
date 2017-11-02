@@ -23,6 +23,7 @@ import Http
 import String
 import Navigation
 import Date
+import Json.Encode as Encode
 import Json.Decode as Decode
 import Json.Decode.Pipeline as DP
 
@@ -70,13 +71,14 @@ type alias TokenResp =
     }
 
 type alias UserInfo =
-    { email : String
+    { sub : String
+    , fullname : String
+    , email : String
     , scope : List String
     }
 
 type Msg
     = LoginRedirect
-    | Logout
     | UserInfoResp (Result Http.Error UserInfo)
 
 --------------------------------------------------
@@ -110,10 +112,6 @@ update msg model =
     LoginRedirect ->
         ( model, loginRedirect () )
 
-    -- auth sdk will take care of logout hence keep model unchanged so far
-    -- otherwise double refresh (model change refresh plus after logout refresh)
-    Logout -> ( model, logout () )
-
     UserInfoResp (Ok user) -> let scope2 = case model.tokenResp of
                                           Nothing -> []
                                           Just tr -> tr.scope
@@ -146,7 +144,9 @@ fetchUserInfo config tr =
 decodeUserInfo : Decode.Decoder UserInfo
 decodeUserInfo =
     DP.decode UserInfo
-        |> DP.required "email" Decode.string
+        |> DP.required "sub" Decode.string
+        |> DP.optional "fullname" Decode.string "User name not found"
+        |> DP.optional "email" Decode.string "Email not found"
         |> DP.hardcoded []
 
 
@@ -204,9 +204,9 @@ displayUserInfo m =
         [ h5 [] [ text "Additional Data" ],
               (case m.userInfo of
                    Ok ui -> div []
-                            [ div [] [ text "icon"]
+                            [ div [ class "solar-logo" ] [ text "vivint.Solar"]
                             , div []
-                                [ p [] [ text ("Account Name " ++ ui.email) ]
+                                [ p [] [ text ("Account Name " ++ ui.fullname) ]
                                 , p [] [ text "This application can do following with Vivint Solar on your behalf: " ]
                                 , ul [] (List.map (\s -> li [] [ text s ]) ui.scope)
                                 ]
@@ -227,5 +227,3 @@ datase = attribute "data-se"
 --------------------------------------------------
 
 port loginRedirect : () -> Cmd msg
-port loginCustom : () -> Cmd msg
-port logout : () -> Cmd msg

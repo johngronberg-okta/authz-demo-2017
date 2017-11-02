@@ -49,7 +49,7 @@ export function bootstrap(config) {
   const tokenResp = hashObj ? {
     accessToken: hashObj['access_token'],
     idToken: hashObj['id_token'],
-    scope: hashObj['scope'].split('+'),
+    scope: decodeURIComponent(hashObj['scope']).split('+'),
   } : null;
 
   console.log(hashObj);
