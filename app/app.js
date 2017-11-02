@@ -30,7 +30,6 @@ export function bootstrap(config) {
     clientId: config.clientId,
     redirectUri: config.redirectUri,
     authorizeUrl: authzUrl,
-    scopes: ['openid', 'profile:read', 'usage:read'],
   });
 
 
