@@ -159,8 +159,8 @@ view m =
     div []
         [ div [ class "ui container"]
               [ div [ class "ui grid"]
-                    [ div [class "two wide column"] [ img [ class "company-logo", src "/assets/images/pge-spot-full-rgb-pos-lg.png"] [] ]
-                    , div [class "four wide column"] [ h2 [ class "company-title"] [ text "Pacific Gas and Electric Company" ] ]
+                    [ div [class "two wide column"] [ img [ class "ui image", src "/assets/images/pge-spot-full-rgb-pos-lg.png"] [] ]
+                    , div [class "four wide column"] [ h2 [ class "ui huge header company-title"] [ text "Pacific Gas and Electric Company" ] ]
                     , div [class "ten wide column"] [ span [ class "pull-right"] [ text "Mark Stevens"] ]
                     ]
               ]
@@ -215,7 +215,7 @@ displayUserInfo : UserInfo -> Html Msg
 displayUserInfo ui =
     div [ class "ui grid" ]
         [ div [ class "four wide column" ]
-              [ img [ class "solar-logo", src "/assets/images/vivint-solar.png" ] [] ]
+              [ img [ class "ui image", src "/assets/images/vivint-solar.png" ] [] ]
 
         , div [ class "twelve wide column" ]
             [ h5 [ class "ui header" ] [ text ("Account Name: " ++ ui.fullname) ]
