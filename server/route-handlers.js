@@ -22,6 +22,6 @@ const handlers = module.exports = {};
  *
  * Route: /
  */
-handlers.scenarios = (req, res) => {
+handlers.main = (req, res) => {
   res.render('index', { config });
 };

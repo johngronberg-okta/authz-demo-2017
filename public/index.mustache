@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>App</title>
-    <link href="/assets/vendor/semantic.min.css" type="text/css" rel="stylesheet"/>
+    <link href="/assets/css/semantic-ui/semantic.min.css" type="text/css" rel="stylesheet"/>
     <base href="/"/>
   </head>
 
@@ -11,7 +11,7 @@
 
     <h1>Hello PG&amp;E</h1>
     <div id="app-container">
-      </div>
+    </div>
 
     <script src="/assets/bundle.js"></script>
 
@@ -19,11 +19,12 @@
      var options = {
        container: '#app-container',
        oktaUrl: '{{{config.oidc.oktaUrl}}}',
+       authzUrl: '{{{config.oidc.authzUrl}}}',
        clientId: '{{config.oidc.clientId}}',
        redirectUri: '{{{config.oidc.redirectUri}}}'
      };
 
-     //bundle.bootstrap(options);
+     bundle.bootstrap(options);
     </script>
   </body>
 </html>

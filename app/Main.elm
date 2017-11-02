@@ -25,7 +25,7 @@ import Date
 
 main : Program ProgramOptions Model Msg
 main =
-    Navigation.programWithFlags UrlChange
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update
@@ -38,36 +38,32 @@ main =
 --------------------------------------------------
 
 type alias ProgramOptions =
-    { user : Maybe User
+    { tokenResp : Maybe TokenResp
     }
 
 type alias Model =
-    { history : List Navigation.Location
-    , user : Maybe User
+    { tokenResp : Maybe TokenResp
     }
 
 
-type alias User =
-    { email : String
-    , iss : String
-    , iat : Int
-    , exp : Int
+type alias TokenResp =
+    { idToken : String
+    , accessToken : String
+    , scope : List String
     }
 
 type Msg
     = LoginRedirect
-    | LoginCustom
     | Logout
-    | UrlChange Navigation.Location
 
 --------------------------------------------------
 -- INIT
 --------------------------------------------------
 
-init : ProgramOptions -> Navigation.Location  -> (Model, Cmd Msg)
-init opt location = ( Model [ location ] opt.user
-                    , if location.pathname == customUrl then loginCustom () else Cmd.none
-                    )
+init : ProgramOptions  -> (Model, Cmd Msg)
+init opt = ( Model opt.tokenResp
+           , Cmd.none
+           )
 
 
 --------------------------------------------------
@@ -80,69 +76,25 @@ update msg model =
     LoginRedirect ->
         ( model, loginRedirect () )
 
-    LoginCustom -> ( model, loginCustom () )
-
     -- auth sdk will take care of logout hence keep model unchanged so far
     -- otherwise double refresh (model change refresh plus after logout refresh)
     Logout -> ( model, logout () )
 
-    UrlChange location ->
-        ( { model | history = location :: model.history }
-        , Cmd.none
-        )
 
 
 --------------------------------------------------
 -- VIEW
 --------------------------------------------------
 
-redirectUrl : String
-redirectUrl = "/authorization-code/login-redirect"
-
-customUrl : String
-customUrl = "/authorization-code/login-custom"
-
-profileUrl : String
-profileUrl = "/authorization-code/profile"
-
 view : Model -> Html Msg
-view model =
-    case List.head model.history of
-        Nothing -> overviewHtml
-        Just loc -> handleRouter model loc
+view = loginRedirectHtml
 
-handleRouter : Model -> Navigation.Location -> Html Msg
-handleRouter model loc = case Dict.get loc.pathname routers of
-                             Just handler -> handler model
-                             Nothing -> overviewHtml
-
-routers : Dict String (Model -> Html Msg)
-routers = fromList [ (redirectUrl, loginRedirectHtml)
-                   , (customUrl, loginCustomHtml)
-                   , (profileUrl, profileHtml)
-                   ]
-
-overviewHtml : Html Msg
-overviewHtml =
-    div [ id "default-app-text" ]
-        [ text "Samples render here"
-        ]
-
-scenarioLink : String   -- ^ URL
-            -> String   -- ^ attribute value of data-se
-            -> String   -- ^ link name
-            -> Html Msg
-scenarioLink url se name = li [] [a [ href url, datase se ] [ text name ]]
+-- case List.head model.history of
 
 loginRedirectHtml : Model -> Html Msg
-loginRedirectHtml _ =
+loginRedirectHtml m =
     div []
-        [ p []
-            [ text "Click "
-            , strong [] [ text "Login with Okta" ]
-            , text " to redirect to your Okta org for authentication."
-            ]
-        , table [ class "ui collapsing celled table compact inverted grey" ]
+        [ table [ class "ui collapsing celled table compact inverted grey" ]
                 [ thead []
                         [ tr []
                              [ th [ colspan 2 ]
@@ -151,7 +103,7 @@ loginRedirectHtml _ =
                         ]
                 , tbody []
                         [ tr []
-                             [ td [] [ text "User"]
+                             [ td [] [ text "user" ]
                              , strong [] [ text "george" ]
                              ]
                         , tr []
@@ -171,55 +123,14 @@ loginRedirectHtml _ =
                   , text "Login with Okta"
                   ]
             ]
+
+        , div []
+            (case m.tokenResp of
+                Nothing -> []
+                Just t -> [ text t.accessToken ])
         ]
 
 
--- login custom scenario will render login form from Okta Signin Widget hence render nothing from Elm.
--- @see init function.
-loginCustomHtml : Model -> Html Msg
-loginCustomHtml _ = text ""
-
-profileHtml : Model -> Html Msg
-profileHtml model =
-    case model.user of
-        Nothing -> p [] [ text "no profile found" ]
-        Just user ->
-            div [ class "profile" ]
-                [ h2 [ class "ui icon header"]
-                      [ i [ class "hand peace icon"] []
-                      , div [ class "content" ] [ text "Signed In" ]
-                      ]
-                , table [ class "ui collapsing celled table inverted black" ]
-                      [ thead []
-                            [ tr []
-                                  [ th [ colspan 2 ]
-                                        [ text "Some claims from the id_token" ]
-                                  ]
-                            ]
-                      , tbody []
-                          [ tr []
-                                [ td [] [ text "email"]
-                                , td [ datase "email" ] [ text user.email ]
-                                ]
-                          , tr []
-                              [ td [] [ text "exp"]
-                              , td [] [ text (toString (fromInt user.exp)) ]
-                              ]
-                        ]
-                      ]
-                , p []
-                    [ button
-                          [ id "logout"
-                          , datase "logout-link"
-                          , class "ui grey icon button"
-                          , onClick Logout
-                          ]
-                          [ i [ class "sign out icon" ] []
-                          , text "Sign out"
-                  ]
-                    ]
-
-                ]
 
 fromInt : Int -> Date.Date
 fromInt = Date.fromTime << toFloat << (*) 1000

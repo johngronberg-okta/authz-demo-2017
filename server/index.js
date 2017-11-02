@@ -45,7 +45,8 @@ app.use(session({
 
 // These are the routes that need to be implemented to handle the
 // authorization code scenarios
-app.get('/', handlers.scenarios);
+app.get('/', handlers.main);
+app.get('*', handlers.main);
 
 app.listen(config.server.port, () => {
   console.log(`Express server started on http://localhost:${config.server.port}`);

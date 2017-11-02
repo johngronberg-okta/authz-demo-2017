@@ -1,9 +1,9 @@
 {
     "oidc": {
-        "oktaUrl": "http://127.0.0.1:7777",
-        "clientId": "zYVNoNIeSwul32vpNiOz",
-        "clientSecret": "",
-        "redirectUri": "http://localhost:3000/authorization-code/callback"
+        "oktaUrl": "http://rain.okta1.com:1802/",
+        "authzUrl": "/oauth2/aus65oktyNx0Md9qB0g4/v1/authorize",
+        "clientId": "N5wJ9Xq3EFSnOQvE3E9S",
+        "redirectUri": "http://localhost:54321/"
     },
 
     "server": {

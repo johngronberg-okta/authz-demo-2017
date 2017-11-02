@@ -13,32 +13,42 @@
 import OktaAuth from '@okta/okta-auth-js/jquery';
 
 import loginRedirect from './login-redirect';
-import loginCustom from './login-custom';
 import logout from './logout';
 
 const Elm = require('./Main.elm');
 
 export function bootstrap(config) {
+
   const auth = new OktaAuth({
     url: config.oktaUrl,
-    issuer: config.issuer,
+    issuer: config.oktaUrl, // <------- works! but sounds right?
     clientId: config.clientId,
     redirectUri: config.redirectUri,
-    scopes: ['openid', 'email', 'profile'],
+    authorizeUrl: `${config.oktaUrl}${config.authzUrl}`,
+    scopes: ['openid', 'profile:read', 'usage:read'],
   });
+
+  const hashes = (window.location.hash.substr(1)).split('&') || [];
+  const hashObj = hashes.reduce((init, x) => {
+    const xs = x.split('=');
+    let key = xs[0];
+    const val = xs[1];
+    return Object.assign({}, init, {[key]: val});
+  }, {});
+
+  console.log(hashObj);
 
   const containerEl = document.querySelector(config.container);
   const app = Elm.Main.embed(containerEl, {
-    // https://github.com/elm-guides/elm-for-js/blob/master/Where%2520Did%2520Null%2520And%2520Undefined%2520Go.md
-    user: typeof config.user !== 'undefined' ? config.user : null,
+    tokenResp: {
+      accessToken: hashObj['access_token'],
+      idToken: hashObj['id_token'],
+      scope: hashObj['scope'].split('+'),
+    }
   });
 
   app.ports.loginRedirect.subscribe(() => {
     loginRedirect(auth);
-  });
-
-  app.ports.loginCustom.subscribe(() => {
-    loginCustom(config);
   });
 
   app.ports.logout.subscribe(() => {

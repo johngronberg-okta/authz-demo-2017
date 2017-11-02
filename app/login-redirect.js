@@ -11,5 +11,5 @@
  */
 
 export default function loginRedirect(auth) {
-  auth.token.getWithRedirect({ responseType: 'code' });
+  auth.token.getWithRedirect({ responseType: ['token', 'id_token'] });
 }
