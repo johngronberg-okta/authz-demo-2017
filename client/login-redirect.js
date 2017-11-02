@@ -14,5 +14,6 @@ export default function loginRedirect(auth) {
   auth.token.getWithRedirect({
     responseType: ['token', 'id_token'],
     scopes: ['openid', 'profile', 'profile:read', 'usage:read'],
+    prompt: 'consent',
   });
 }
