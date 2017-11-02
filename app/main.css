@@ -6,7 +6,7 @@ body {
   padding: 2em 0;
 }
 
-.link-solar-row {
+.ui.table td.link-solar-row {
   text-align: center;
 }
 

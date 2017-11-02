@@ -73,7 +73,7 @@ type alias TokenResp =
 type alias UserInfo =
     { sub : String
     , fullname : String
-    , email : String
+    , login : String
     , scope : List String
     }
 
@@ -145,8 +145,8 @@ decodeUserInfo : Decode.Decoder UserInfo
 decodeUserInfo =
     DP.decode UserInfo
         |> DP.required "sub" Decode.string
-        |> DP.optional "fullname" Decode.string "User name not found"
-        |> DP.optional "email" Decode.string "Email not found"
+        |> DP.optional "name" Decode.string "User name not found"
+        |> DP.optional "preferred_username" Decode.string "Email not found"
         |> DP.hardcoded []
 
 
@@ -161,7 +161,7 @@ view m =
               [ div [ class "ui grid"]
                     [ div [class "two wide column"] [ img [ class "company-logo", src "/assets/images/pge-spot-full-rgb-pos-lg.png"] [] ]
                     , div [class "four wide column"] [ h2 [ class "company-title"] [ text "Pacific Gas and Electric Company" ] ]
-                    , div [class "ten wide column"] [ span [ class "pull-right"] [ text "Mark Stevents"] ]
+                    , div [class "ten wide column"] [ span [ class "pull-right"] [ text "Mark Stevens"] ]
                     ]
               ]
 
@@ -218,7 +218,7 @@ displayUserInfo ui =
               [ img [ class "solar-logo", src "/assets/images/vivint-solar.png" ] [] ]
 
         , div [ class "twelve wide column" ]
-            [ h5 [ class "ui header" ] [ text ("Account Name " ++ ui.fullname) ]
+            [ h5 [ class "ui header" ] [ text ("Account Name: " ++ ui.fullname) ]
             , p [] [ text "This application can do following with Vivint Solar on your behalf: " ]
             , ul [] (List.map (\s -> li [] [ text s ]) ui.scope)
             ]
