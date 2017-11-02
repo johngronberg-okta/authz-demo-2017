@@ -63,6 +63,7 @@ type alias TokenResp =
 
 type alias UserInfo =
     { email : String
+    , scope : List String
     }
 
 type Msg
@@ -95,8 +96,11 @@ update msg model =
     -- otherwise double refresh (model change refresh plus after logout refresh)
     Logout -> ( model, logout () )
 
-    UserInfoResp (Ok user) -> ( { model | userInfo = Ok user }, Cmd.none )
-    UserInfoResp (Err e) -> ( { model | userInfo = Err (toString e) } , Cmd.none)
+    UserInfoResp (Ok user) -> let u = case model.tokenResp of
+                                          Nothing -> user
+                                          Just tr -> { user | scope = tr.scope }
+                              in ( { model | userInfo = Ok u}, Cmd.none )
+    UserInfoResp (Err e) -> ( { model | userInfo = Err (toString e) }, Cmd.none)
 
 -- Authorization: Bearer <access_token>
 
@@ -120,6 +124,7 @@ decodeUserInfo : Decode.Decoder UserInfo
 decodeUserInfo =
     DP.decode UserInfo
         |> DP.required "email" Decode.string
+        |> DP.hardcoded []
 
 
 --------------------------------------------------
@@ -134,21 +139,17 @@ view = loginRedirectHtml
 loginRedirectHtml : Model -> Html Msg
 loginRedirectHtml m =
     div []
-        [ table [ class "ui collapsing celled table compact inverted grey" ]
+        [ h1 [] [ text "Energy Production & Usage" ]
+        , h5 [] [ text "123 Kent Ave, Kentfield, CA" ]
+
+        , table [ class "ui collapsing celled table compact inverted grey" ]
                 [ thead []
                         [ tr []
-                             [ th [ colspan 2 ]
-                                  [ text "If you're using the mock-okta server:" ]
-                             ]
+                             (List.map (\t -> th [] [ text t] ) [ "", "Jul", "Aug", "Sep", "Oct"])
                         ]
                 , tbody []
                         [ tr []
-                             [ td [] [ text "user" ]
-                             , strong [] [ text "george" ]
-                             ]
-                        , tr []
-                             [ td [] [ text "Pass"]
-                             , strong [] [ text "Asdf1234" ]
+                             [
                              ]
                         ]
                 ]
@@ -166,17 +167,28 @@ loginRedirectHtml m =
 
         , displayUserInfo m
 
-        , div []
-            (case m.tokenResp of
-                Nothing -> []
-                Just t -> [ text t.accessToken ])
+            --(case m.tokenResp of
+              --  Nothing -> []
+                --Just t -> [ text t.accessToken ])
         ]
 
 displayUserInfo : Model -> Html Msg
 displayUserInfo m =
-    case m.userInfo of
-        Ok ui -> p [] [ text ui.email ]
-        Err e -> p [] [ text e ]
+    div []
+        [ h5 [] [ text "Additional Data" ],
+              (case m.userInfo of
+                   Ok ui -> div []
+                            [ div [] [ text "icon"]
+                            , div []
+                                [ p [] [ text ("Account Name " ++ ui.email) ]
+                                , p [] [ text "This application can do following with Vivint Solar on your behalf: " ]
+                                , ul [] (List.map (\s -> li [] [ text s ]) ui.scope)
+                                ]
+
+                            ]
+                   Err e -> p [] [ text e ]
+              )
+        ]
 
 fromInt : Int -> Date.Date
 fromInt = Date.fromTime << toFloat << (*) 1000
