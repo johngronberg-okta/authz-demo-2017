@@ -21,7 +21,7 @@ export function bootstrap(config) {
 
   const authzUrl = `${config.oktaUrl}oauth2/${config.asId}/v1/authorize`;
   const userInfoUrl = `${config.oktaUrl}oauth2/${config.asId}/v1/userinfo`;
-  const issuer = `${config.oktaUrl}/oauth2/aus65oktyNx0Md9qB0g4`;
+  const issuer = `${config.oktaUrl}/oauth2/${config.asId}`;
 
   // init auth sdk
   const auth = new OktaAuth({
@@ -32,6 +32,11 @@ export function bootstrap(config) {
     authorizeUrl: authzUrl,
   });
 
+  const getScopes = (scopeString) => {
+    const xs = decodeURIComponent(scopeString).split('+');
+
+    return xs.filter(x => ['openid', 'profile'].indexOf(x) === -1);
+  };
 
   // read token from URL
   let hashObj = null;
@@ -49,7 +54,7 @@ export function bootstrap(config) {
   const tokenResp = hashObj ? {
     accessToken: hashObj['access_token'],
     idToken: hashObj['id_token'],
-    scope: decodeURIComponent(hashObj['scope']).split('+'),
+    scope: getScopes(hashObj['scope']),
   } : null;
 
   console.log(hashObj);

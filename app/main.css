@@ -1,3 +1,15 @@
 body {
-  padding: 50px;
+  //background-color: #DADADA;
+}
+
+.container {
+  padding: 2em 0;
+}
+
+.link-solar-row {
+  text-align: center;
+}
+
+.pull-right {
+  float: right;
 }

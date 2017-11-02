@@ -157,38 +157,41 @@ decodeUserInfo =
 view : Model -> Html Msg
 view m =
     div []
-        [ section []
-              [ img [ class "company-logo", src "/assets/images/pge-spot-full-rgb-pos-lg.png"] []
-              , h2 [ class "company-title"] [ text "Pacific Gas and Electric Company" ]
-              , span [] [ text "Mark Stevents"]
+        [ div [ class "ui container"]
+              [ div [ class "ui grid"]
+                    [ div [class "two wide column"] [ img [ class "company-logo", src "/assets/images/pge-spot-full-rgb-pos-lg.png"] [] ]
+                    , div [class "four wide column"] [ h2 [ class "company-title"] [ text "Pacific Gas and Electric Company" ] ]
+                    , div [class "ten wide column"] [ span [ class "pull-right"] [ text "Mark Stevents"] ]
+                    ]
               ]
 
-        , h1 [] [ text "Energy Production & Usage" ]
-        , h5 [] [ text "123 Kent Ave, Kentfield, CA" ]
-        , table [ class "ui collapsing celled table compact inverted grey" ]
+        , div [ class "ui container"]
+            [ h1 [] [ text "Energy Production & Usage" ]
+            , h5 [] [ text "123 Kent Ave, Kentfield, CA" ]
+            , table [ class "ui celled striped table" ]
                 [ thead []
-                        [ tr []
-                             (List.map (\t -> th [] [ text t] ) [ "", "Jul", "Aug", "Sep", "Oct"])
-                        ]
+                      [ tr []
+                            (List.map (\t -> th [] [ text t] ) [ "", "Jul", "Aug", "Sep", "Oct"])
+                      ]
                 , tbody []
-                        [ solarRow m
-                        , tr [] (td [] [text "Usage PG & E"] :: (List.map (\u -> td [] [text <| toString u.pge]) m.usage))
-                        , tr [] (td [] [text "net"] :: (List.map (\u -> td [] [text <| toString u.net]) m.usage))
-                        , tr [] (td [] [text "$/KwH"] :: (List.map (\u -> td [] [text <| toString u.perc]) m.usage))
-                        ]
+                    [ solarRow m
+                    , tr [] (td [] [text "Usage PG & E"] :: (List.map (\u -> td [] [text <| toString u.pge]) m.usage))
+                    , tr [] (td [] [text "net"] :: (List.map (\u -> td [] [text <| toString u.net]) m.usage))
+                    , tr [] (td [] [text "$/KwH"] :: (List.map (\u -> td [] [text <| toString u.perc]) m.usage))
+                    ]
                 ]
+            ]
 
-        , displayUserInfo m
+        , additionalData m
         ]
 
 solarRow : Model -> Html Msg
 solarRow m = case m.userInfo of
                  Err _ -> tr []
                           [ td [] [ text "Solar Production"]
-                          , td [colspan 4]
+                          , td [colspan 4, class "link-solar-row"]
                               [ button
                                     [ id "login"
-                                    , datase "login-link"
                                     , class "ui icon button blue"
                                     , onClick LoginRedirect
                                     ]
@@ -198,29 +201,28 @@ solarRow m = case m.userInfo of
                  Ok _ -> tr []
                          (td [] [ text "Solar Production (Vivint)"] :: (List.map (\u -> td [] [text <| toString u.solar]) m.usage))
 
-displayUserInfo : Model -> Html Msg
-displayUserInfo m =
-    div []
-        [ h5 [] [ text "Additional Data" ],
-              (case m.userInfo of
-                   Ok ui -> div []
-                            [ div [ class "solar-logo" ] [ text "vivint.Solar"]
-                            , div []
-                                [ p [] [ text ("Account Name " ++ ui.fullname) ]
-                                , p [] [ text "This application can do following with Vivint Solar on your behalf: " ]
-                                , ul [] (List.map (\s -> li [] [ text s ]) ui.scope)
-                                ]
-
-                            ]
-                   Err e -> p [] [ text e ]
-              )
+additionalData : Model -> Html Msg
+additionalData m =
+    div [ class "ui container" ]
+        [ h5 [ class "ui header" ] [ text "Additional Data" ],
+          (case m.userInfo of
+               Ok ui -> displayUserInfo ui
+               Err e -> p [] [ text e ]
+          )
         ]
 
-fromInt : Int -> Date.Date
-fromInt = Date.fromTime << toFloat << (*) 1000
+displayUserInfo : UserInfo -> Html Msg
+displayUserInfo ui =
+    div [ class "ui grid" ]
+        [ div [ class "four wide column" ]
+              [ img [ class "solar-logo", src "/assets/images/vivint-solar.png" ] [] ]
 
-datase : String -> Attribute msg
-datase = attribute "data-se"
+        , div [ class "twelve wide column" ]
+            [ h5 [ class "ui header" ] [ text ("Account Name " ++ ui.fullname) ]
+            , p [] [ text "This application can do following with Vivint Solar on your behalf: " ]
+            , ul [] (List.map (\s -> li [] [ text s ]) ui.scope)
+            ]
+        ]
 
 --------------------------------------------------
 -- PORTs
