@@ -49,10 +49,18 @@ type alias Model =
     { config : Config
     , tokenResp : Maybe TokenResp
     , userInfo : Result String UserInfo
+    , usage : List Usage
     }
 
 type alias Config =
     { userInfoUrl : String
+    }
+
+type alias Usage =
+    { solar : Int
+    , pge : Int
+    , net : Int
+    , perc : Float
     }
 
 type alias TokenResp =
@@ -78,9 +86,19 @@ type Msg
 init : ProgramOptions  -> (Model, Cmd Msg)
 init opt =
   case opt.tokenResp of
-      Nothing -> ( Model opt.config Nothing (Err ""), Cmd.none )
-      Just tr -> ( Model opt.config (Just tr) (Err ""), fetchUserInfo opt.config tr )
+      Nothing -> ( Model opt.config Nothing (Err "") defaultUsage, Cmd.none )
+      Just tr -> ( Model opt.config (Just tr) (Err "") defaultUsage, fetchUserInfo opt.config tr )
 
+defaultUsage : List Usage
+defaultUsage =
+    [ makeUsage 0 428 0.201
+    , makeUsage 0 432 0.205
+    , makeUsage 0 544 0.211
+    , makeUsage 0 368 0.200
+    ]
+
+makeUsage : Int -> Int -> Float -> Usage
+makeUsage s p perc = Usage s p (p - s) perc
 
 --------------------------------------------------
 -- UPDATE
@@ -96,10 +114,16 @@ update msg model =
     -- otherwise double refresh (model change refresh plus after logout refresh)
     Logout -> ( model, logout () )
 
-    UserInfoResp (Ok user) -> let u = case model.tokenResp of
-                                          Nothing -> user
-                                          Just tr -> { user | scope = tr.scope }
-                              in ( { model | userInfo = Ok u}, Cmd.none )
+    UserInfoResp (Ok user) -> let scope2 = case model.tokenResp of
+                                          Nothing -> []
+                                          Just tr -> tr.scope
+                                  user2 = Ok { user | scope = scope2 }
+                                  usage2 = [ makeUsage 105 428 0.201
+                                           , makeUsage 122 432 0.205
+                                           , makeUsage 145 544 0.211
+                                           , makeUsage 116 368 0.200
+                                           ]
+                              in ( { model | userInfo = user2, usage = usage2 }, Cmd.none )
     UserInfoResp (Err e) -> ( { model | userInfo = Err (toString e) }, Cmd.none)
 
 -- Authorization: Bearer <access_token>
@@ -148,9 +172,10 @@ loginRedirectHtml m =
                              (List.map (\t -> th [] [ text t] ) [ "", "Jul", "Aug", "Sep", "Oct"])
                         ]
                 , tbody []
-                        [ tr []
-                             [
-                             ]
+                        [ solarRow m
+                        , tr [] (td [] [text "Usage PG & E"] :: (List.map (\u -> td [] [text <| toString u.pge]) m.usage))
+                        , tr [] (td [] [text "net"] :: (List.map (\u -> td [] [text <| toString u.net]) m.usage))
+                        , tr [] (td [] [text "$/KwH"] :: (List.map (\u -> td [] [text <| toString u.perc]) m.usage))
                         ]
                 ]
         , p []
@@ -160,17 +185,29 @@ loginRedirectHtml m =
                   , class "ui icon button blue"
                   , onClick LoginRedirect
                   ]
-                  [ i [ class "sign in icon" ] []
-                  , text "Login with Okta"
+                  [ text "Link Solar Account"
                   ]
             ]
 
         , displayUserInfo m
-
-            --(case m.tokenResp of
-              --  Nothing -> []
-                --Just t -> [ text t.accessToken ])
         ]
+
+solarRow : Model -> Html Msg
+solarRow m = case m.userInfo of
+                 Err _ -> tr []
+                          [ td [] [ text "Solar Production"]
+                          , td [colspan 4]
+                              [ button
+                                    [ id "login"
+                                    , datase "login-link"
+                                    , class "ui icon button blue"
+                                    , onClick LoginRedirect
+                                    ]
+                                    [ text "Link Solar Account" ]
+                              ]
+                          ]
+                 Ok _ -> tr []
+                         (td [] [ text "Solar Production (Vivint)"] :: (List.map (\u -> td [] [text <| toString u.solar]) m.usage))
 
 displayUserInfo : Model -> Html Msg
 displayUserInfo m =
