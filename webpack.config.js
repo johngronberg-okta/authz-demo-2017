@@ -17,13 +17,14 @@ const webpack = require('webpack');
 
 const semanticUiDir = require.resolve('semantic-ui-css/semantic.min.css');
 const outPath = path.resolve(__dirname, 'dist');
+const clientDir = 'client';
 
 console.log(`Building frontend assets into ${outPath}`);
 
 module.exports = {
   entry: {
     bundle: [
-      './app/app.js',
+      `./${clientDir}/app.js`,
     ],
   },
   output: {
@@ -46,19 +47,19 @@ module.exports = {
       {
         loader: 'babel-loader',
         test: /\.js$/,
-        include: path.join(__dirname, 'app'),
+        include: path.join(__dirname, clientDir),
         query: {
           presets: ['es2015'],
         },
       },
       {
         test: /\.elm$/,
-        include: path.join(__dirname, 'app'),
+        include: path.join(__dirname, clientDir),
         loader: 'elm-webpack-loader',
       },
       {
         test: /\.css$/,
-        include: path.join(__dirname, 'app'),
+        include: path.join(__dirname, clientDir),
         loader: [
           'style-loader',
           'css-loader'
