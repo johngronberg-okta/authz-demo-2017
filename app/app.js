@@ -13,6 +13,8 @@
 import OktaAuth from '@okta/okta-auth-js/jquery';
 import loginRedirect from './login-redirect';
 
+const css = require('./main.css');
+
 const Elm = require('./Main.elm');
 
 export function bootstrap(config) {

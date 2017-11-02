@@ -15,7 +15,7 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 
-const semanticUiDir = path.dirname(require.resolve('semantic-ui-css/semantic.min.css'));
+const semanticUiDir = require.resolve('semantic-ui-css/semantic.min.css');
 const outPath = path.resolve(__dirname, 'dist');
 
 console.log(`Building frontend assets into ${outPath}`);
@@ -34,7 +34,6 @@ module.exports = {
   devtool: 'source-map',
   plugins: [
     new CopyWebpackPlugin([
-      { from: 'app' },
       { from: semanticUiDir, to: 'css/semantic-ui' },
       { from: 'public/images', to: 'images' },
     ]),
@@ -57,6 +56,14 @@ module.exports = {
         include: path.join(__dirname, 'app'),
         loader: 'elm-webpack-loader',
       },
+      {
+        test: /\.css$/,
+        include: path.join(__dirname, 'app'),
+        loader: [
+          'style-loader',
+          'css-loader'
+        ]
+      }
     ],
   },
 };
