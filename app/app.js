@@ -11,9 +11,7 @@
  */
 
 import OktaAuth from '@okta/okta-auth-js/jquery';
-
 import loginRedirect from './login-redirect';
-import logout from './logout';
 
 const Elm = require('./Main.elm');
 
@@ -23,7 +21,7 @@ export function bootstrap(config) {
   const userInfoUrl = `${config.oktaUrl}oauth2/${config.asId}/v1/userinfo`;
   const issuer = `${config.oktaUrl}/oauth2/aus65oktyNx0Md9qB0g4`;
 
-
+  // init auth sdk
   const auth = new OktaAuth({
     url: config.oktaUrl,
     issuer: issuer,
@@ -34,6 +32,7 @@ export function bootstrap(config) {
   });
 
 
+  // read token from URL
   let hashObj = null;
 
   if (window.location.hash) {
@@ -54,6 +53,7 @@ export function bootstrap(config) {
 
   console.log(hashObj);
 
+  // render main view
   const containerEl = document.querySelector(config.container);
   const app = Elm.Main.embed(containerEl, {
     config: {
@@ -62,13 +62,11 @@ export function bootstrap(config) {
     tokenResp: tokenResp,
   });
 
+  // Elm -> JS
   app.ports.loginRedirect.subscribe(() => {
     loginRedirect(auth);
   });
 
-  app.ports.logout.subscribe(() => {
-    logout(auth);
-  });
 }
 
 export default bootstrap;
