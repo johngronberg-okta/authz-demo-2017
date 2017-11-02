@@ -36,6 +36,7 @@ module.exports = {
     new CopyWebpackPlugin([
       { from: 'app' },
       { from: semanticUiDir, to: 'css/semantic-ui' },
+      { from: 'public/images', to: 'images' },
     ]),
     new webpack.ProvidePlugin({
       jQuery: 'jquery',

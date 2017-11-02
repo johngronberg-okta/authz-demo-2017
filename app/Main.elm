@@ -126,7 +126,6 @@ update msg model =
                               in ( { model | userInfo = user2, usage = usage2 }, Cmd.none )
     UserInfoResp (Err e) -> ( { model | userInfo = Err (toString e) }, Cmd.none)
 
--- Authorization: Bearer <access_token>
 
 fetchUserInfo : Config -> TokenResp -> Cmd Msg
 fetchUserInfo config tr =
@@ -156,16 +155,16 @@ decodeUserInfo =
 --------------------------------------------------
 
 view : Model -> Html Msg
-view = loginRedirectHtml
-
--- case List.head model.history of
-
-loginRedirectHtml : Model -> Html Msg
-loginRedirectHtml m =
+view m =
     div []
-        [ h1 [] [ text "Energy Production & Usage" ]
-        , h5 [] [ text "123 Kent Ave, Kentfield, CA" ]
+        [ section []
+              [ img [ class "company-logo", src "/assets/images/pge-spot-full-rgb-pos-lg.png"] []
+              , h2 [ class "company-title"] [ text "Pacific Gas and Electric Company" ]
+              , span [] [ text "Mark Stevents"]
+              ]
 
+        , h1 [] [ text "Energy Production & Usage" ]
+        , h5 [] [ text "123 Kent Ave, Kentfield, CA" ]
         , table [ class "ui collapsing celled table compact inverted grey" ]
                 [ thead []
                         [ tr []
@@ -178,16 +177,6 @@ loginRedirectHtml m =
                         , tr [] (td [] [text "$/KwH"] :: (List.map (\u -> td [] [text <| toString u.perc]) m.usage))
                         ]
                 ]
-        , p []
-            [ button
-                  [ id "login"
-                  , datase "login-link"
-                  , class "ui icon button blue"
-                  , onClick LoginRedirect
-                  ]
-                  [ text "Link Solar Account"
-                  ]
-            ]
 
         , displayUserInfo m
         ]
