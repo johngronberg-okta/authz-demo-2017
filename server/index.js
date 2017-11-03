@@ -17,14 +17,20 @@ const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const cons = require('consolidate');
-const handlers = require('./route-handlers');
-const config = require('../.samples.config.json');
+
+
+const args = process.argv;
+const configFile = args[2] || '.samples.config.json';
+const config = require(`../${configFile}`);
 
 
 const templateDir = path.resolve(__dirname, '../public');
 const frontendDir = path.resolve(__dirname, '../dist');
 
 const app = express();
+const mainH = (req, res) => {
+  res.render('index', { config });
+};
 
 app.use('/assets', express.static(frontendDir));
 
@@ -45,8 +51,8 @@ app.use(session({
 
 // These are the routes that need to be implemented to handle the
 // authorization code scenarios
-app.get('/', handlers.main);
-app.get('*', handlers.main);
+app.get('/', mainH);
+app.get('*', mainH);
 
 app.listen(config.server.port, () => {
   console.log(`Express server started on http://localhost:${config.server.port}`);

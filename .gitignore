@@ -7,3 +7,4 @@ travis_phantomjs
 .vscode
 yarn-error.log
 elm-stuff
+configs/*.json

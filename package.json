@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "build": "elm package install -y && webpack",
-        "start:only": "node server/index.js",
+        "start:only": "node server",
         "start": "npm run build && npm run start:only"
     },
     "author": "Haisheng Wu <haisheng.wu@okta.com>",
