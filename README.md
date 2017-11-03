@@ -33,6 +33,14 @@
 
 Note: you can also edit the app to include TOS and Policy URIs if you want those to be displayed on the consent screen
 
+### Enable CORS
+1. Navigate to Trusted Origins page (Security > API > Trusted Origins)
+2. add an new Origin _if you haven't done so_
+    - Name: xxx
+    - Origin URL: `http://localhost:54321`
+    - Type: check both `CORS` and `Redirect`
+
+
 ### Configure and Run Application
 0. install yarn
     - `curl -o- -L https://yarnpkg.com/install.sh | bash`
@@ -46,5 +54,4 @@ Note: you can also edit the app to include TOS and Policy URIs if you want those
     - `yarn start configs/foo.json`
 
 ## Q&A
-
 1. `auth.token.parseFromUrl()` is one-time action. refresh the page after auth-redirect wont work. what's the implication?
