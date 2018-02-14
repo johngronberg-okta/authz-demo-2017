@@ -11,10 +11,24 @@
  */
 
 import OktaAuth from '@okta/okta-auth-js/jquery';
-import loginRedirect from './login-redirect';
-import Elm from './Main.elm';
+import Elm from './app2/Main.elm';
 
-require('./main.css');
+import './app2/main.css';
+
+function loginRedirect (auth) {
+  auth.token.getWithRedirect({
+    responseType: [
+      'token',
+      'id_token',
+    ],
+    scopes: [
+      'openid',
+      'profile',
+    ],
+    responseMode: 'form_post',
+    //prompt: 'consent',
+  });
+}
 
 export function bootstrap (config) {
   const authzUrl = `${config.oktaUrl}oauth2/${config.asId}/v1/authorize`;
@@ -29,12 +43,12 @@ export function bootstrap (config) {
     authorizeUrl: authzUrl,
   });
 
-  const renderView = (accessTokenObj, userInfo) => {
+  const renderView = (idToken = null, userInfo = null) => {
     // render main view
     const containerEl = document.querySelector(config.container);
     const app = Elm.Main.embed(containerEl, {
-      accessTokenResp: accessTokenObj,
-      userInfo: userInfo,
+      idToken,
+      //userInfo,
     });
     // Elm -> JS
     app.ports.loginRedirect.subscribe(() => {
@@ -42,19 +56,7 @@ export function bootstrap (config) {
     });
   };
 
-  auth.token.parseFromUrl()
-    .then(function (tokens) {
-      const accessTokenObj = tokens[0];
-
-      return auth.token.getUserInfo(accessTokenObj)
-        .then(function (user) {
-          renderView(accessTokenObj, user);
-        });
-    })
-    .catch(function (err) {
-      console.warn(err);
-      renderView(null, null);
-    });
+  renderView(config.idToken);
 }
 
 export default bootstrap;
